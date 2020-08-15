@@ -21,9 +21,9 @@ void setup() {
 
 void loop() {
   button.loop();
-  if (button.isReleased()) {
-    startStatus = !startStatus;
-  }
-  Serial.println("Button Status: " + String(startStatus));
-  delay(100);
+  if (button.isPressed())
+    Serial.println("The button is pressed");
+
+  if (button.isReleased())
+    Serial.println("The button is released");
 }
