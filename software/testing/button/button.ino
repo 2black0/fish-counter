@@ -1,6 +1,6 @@
 #include <ezButton.h>
 
-const int btnPin = A3;
+const int btnPin = 13;
 bool startStatus = false;
 
 ezButton button(btnPin);
