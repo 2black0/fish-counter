@@ -4,10 +4,13 @@
             "name": "Linux",
             "includePath": [
                 "/home/setoardy/Downloads/arduino-1.8.13-linux64/arduino-1.8.13/tools/**",
-                "/home/setoardy/Downloads/arduino-1.8.13-linux64/arduino-1.8.13/hardware/arduino/avr/**"
+                "/home/setoardy/Downloads/arduino-1.8.13-linux64/arduino-1.8.13/hardware/arduino/avr/**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
+                "C:\\Program Files (x86)\\Arduino\\tools\\**"
             ],
             "forcedInclude": [
-                "/home/setoardy/Downloads/arduino-1.8.13-linux64/arduino-1.8.13/hardware/arduino/avr/cores/arduino/Arduino.h"
+                "/home/setoardy/Downloads/arduino-1.8.13-linux64/arduino-1.8.13/hardware/arduino/avr/cores/arduino/Arduino.h",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\cores\\arduino\\Arduino.h"
             ],
             "intelliSenseMode": "gcc-x64",
             "compilerPath": "/usr/bin/gcc",
