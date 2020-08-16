@@ -1,33 +1,16 @@
 const int trigPin = 2;
 const int echoPin = 3;
 
-void init_device() {
-  Serial.begin("9600");
-  delay(50);
-}
-
-void init_pin() {
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-}
+long duration;
+int distance;
 
 void setup() {
-  init_device();
-  init_pin();
-  Serial.println("Ultrasonic Sensor Testing");
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  Serial.begin(9600);
 }
 
 void loop() {
-  int distance = read_ultrasonic();
-  Serial.println("Distance: " + String(distance) + "cm");
-  delay(500);
-}
-
-int read_ultrasonic() {
-  Serial.println("Read Sensor Ultrasonic");
-  long duration = 0;
-  int distance = 0;
-
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -35,5 +18,6 @@ int read_ultrasonic() {
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = duration * 0.034 / 2;
-  return distance;
+  Serial.print("Distance: ");
+  Serial.println(distance);
 }
