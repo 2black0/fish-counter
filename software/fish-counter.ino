@@ -82,6 +82,7 @@ void loop() {
 void on_process() {
   Serial.println("On Process");
   distance = read_ultrasonic();
+  Serial.println("Distance:" + String(distance));
   if (distance < 50) {
     onStatus = true;
     totalcounter++;
@@ -95,6 +96,7 @@ void on_process() {
 void weight_process() {
   Serial.println("Weight Process");
   weight = read_weight();
+  Serial.println("Weight:" + String(weight));
   if (weight > 10) {
     delay(1000);
     weight = read_weight();
