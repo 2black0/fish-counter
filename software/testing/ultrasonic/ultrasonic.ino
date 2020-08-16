@@ -1,11 +1,5 @@
-#include <HCSR04.h>
-
 const int trigPin = 2;
 const int echoPin = 3;
-
-int distance = 0;
-
-UltraSonicDistanceSensor Sensor(trigPin, echoPin);
 
 void init_device() {
   Serial.begin("9600");
