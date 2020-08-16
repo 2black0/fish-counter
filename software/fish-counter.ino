@@ -47,6 +47,7 @@ void init_pin() {
 void setup() {
   init_device();
   init_pin();
+  Serial.println("Fish Counter by 2black0");
   lcd_show(1, 0, "Fish Counter", 1);
   lcd_show(0, 1, "by 2black0", 1000);
 }
@@ -72,15 +73,19 @@ void loop() {
     servo2_off();
   }
 
+  Serial.println("S Fish:" + String(smallcounter));
+  Serial.println("B Fish:" + String(bigcounter));
   lcd_show(1, 0, "S Fish:" + String(smallcounter), 1);
   lcd_show(0, 1, "B Fish:" + String(bigcounter), 1000);
 }
 
 void on_process() {
+  Serial.println("On Process");
   distance = read_ultrasonic();
   if (distance < 50) {
     onStatus = true;
     totalcounter++;
+    Serial.println("Counter:" + String(totalcounter));
     lcd_show(1, 0, "Counter:" + String(totalcounter), 1000);
   } else {
     onStatus = false;
@@ -88,6 +93,7 @@ void on_process() {
 }
 
 void weight_process() {
+  Serial.println("Weight Process");
   weight = read_weight();
   if (weight > 10) {
     delay(1000);
@@ -95,16 +101,19 @@ void weight_process() {
     if (weight >= 100) {
       weightStatus = true;
       smallcounter++;
+      Serial.println("S Fish:" + String(smallcounter));
       lcd_show(1, 0, "S Fish:" + String(smallcounter), 1000);
     } else {
       weightStatus = false;
       bigcounter++;
+      Serial.println("B Fish:" + String(bigcounter));
       lcd_show(1, 0, "B Fish:" + String(bigcounter), 1000);
     }
   }
 }
 
 int read_ultrasonic() {
+  Serial.println("Read Sensor Ultrasonic");
   long duration = 0;
   int distance = 0;
 
@@ -119,36 +128,43 @@ int read_ultrasonic() {
 }
 
 int read_weight() {
+  Serial.println("Read Weight");
   // scale.set_scale(calibration_factor);
   return (scale.get_units(), 1);
 }
 
 void servo1_on() {
+  Serial.println("Servo 1 ON");
   servo1.write(90);
   delay(1000);
 }
 
 void servo1_off() {
+  Serial.println("Servo 1 OFF");
   servo1.write(45);
   delay(1000);
 }
 
 void servo2_on() {
+  Serial.println("Servo 2 ON");
   servo2.write(90);
   delay(1000);
 }
 
 void servo2_off() {
+  Serial.println("Servo 2 OFF");
   servo2.write(45);
   delay(1000);
 }
 
 void led_on() {
+  Serial.println("Led ON");
   digitalWrite(ledPin, LOW);
   delay(100);
 }
 
 void led_off() {
+  Serial.println("Led OFF");
   digitalWrite(ledPin, HIGH);
   delay(100);
 }
@@ -159,6 +175,6 @@ void lcd_show(int clear, int lines, String text, int timedelay) {
   }
   lcd.setCursor(0, lines);
   lcd.print(text);
-  Serial.println(text);
+  // Serial.println(text);
   delay(timedelay);
 }
