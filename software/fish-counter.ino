@@ -53,7 +53,6 @@ void setup() {
 
 void loop() {
   on_process();
-
   if (onStatus) {
     onStatus = false;
     led_on();
