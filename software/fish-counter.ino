@@ -18,7 +18,6 @@ int totalcounter = 0;
 int smallcounter = 0;
 int bigcounter = 0;
 
-bool resetStatus = false;
 bool onStatus = false;
 bool weightStatus = false;
 
