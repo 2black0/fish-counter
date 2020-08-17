@@ -23,7 +23,7 @@ void setup() {
 #if defined(ESP8266) || defined(ESP32)
   EEPROM.begin(512);
 #endif
-  // EEPROM.get(calVal_eepromAdress, calibrationValue);
+  EEPROM.get(calVal_eepromAdress, calibrationValue);
 
   long stabilizingtime = 2000;
   boolean _tare = true;

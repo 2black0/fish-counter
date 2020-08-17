@@ -20,6 +20,8 @@ long stabilizingtime = 2000;
 boolean _tare = true;
 const int calVal_eepromAdress = 0;
 long t;
+static boolean newDataReady = 0;
+const int serialPrintInterval = 0;
 
 int weight = 0;
 int distance = 0;
@@ -84,6 +86,9 @@ void loop() {
     led_off();
     servo1_off();
   }
+
+  if (LoadCell.update())
+    newDataReady = true;
 
   weight_process();
   if (weightStatus) {
@@ -150,12 +155,6 @@ int read_ultrasonic() {
 
 int read_weight() {
   Serial.println("Read Weight");
-  static boolean newDataReady = 0;
-  const int serialPrintInterval = 0;
-
-  if (LoadCell.update())
-    newDataReady = true;
-
   if (newDataReady) {
     if (millis() > t + serialPrintInterval) {
       float i = LoadCell.getData();
