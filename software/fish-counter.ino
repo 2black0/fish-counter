@@ -1,3 +1,5 @@
+// coded by 2black0
+
 #include <EEPROM.h>
 #include <HX711_ADC.h>
 #include <LiquidCrystal_I2C.h>
@@ -130,7 +132,7 @@ void weight_process() {
 }
 
 int read_ultrasonic() {
-  Serial.println("Read Sensor Ultrasonic");
+  Serial.println("Read Distance");
   long duration;
   int distance;
   digitalWrite(trigPin, LOW);
@@ -203,6 +205,5 @@ void lcd_show(int clear, int lines, String text, int timedelay) {
   }
   lcd.setCursor(0, lines);
   lcd.print(text);
-  // Serial.println(text);
   delay(timedelay);
 }
