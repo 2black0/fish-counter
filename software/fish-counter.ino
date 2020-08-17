@@ -105,6 +105,7 @@ void on_process() {
   Serial.println("On Process");
   distance = read_ultrasonic();
   Serial.println("Distance:" + String(distance));
+  lcd_show(1, 0, "Distance:" + String(distance), 1000);
   if (distance < 50) {
     onStatus = true;
     totalcounter++;
