@@ -1,5 +1,6 @@
+// -----
 // coded by 2black0
-//
+// -----
 
 #include <EEPROM.h>
 #include <HX711_ADC.h>
