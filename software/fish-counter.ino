@@ -119,7 +119,7 @@ void weight_process() {
   Serial.println("Weight Process");
   weight = read_weight();
   Serial.println("Weight:" + String(weight));
-  weight = read_weight();
+  lcd_show(1, 0, "Weight:" + String(weight), 1000);
   if (weight >= 100) {
     weightStatus = true;
     smallcounter++;
