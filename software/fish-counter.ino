@@ -1,4 +1,5 @@
-#include <HX711.h>
+#include <EEPROM.h>
+#include <HX711_ADC.h>
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
 
@@ -10,7 +11,12 @@ const int servo1Pin = 9;
 const int servo2Pin = 10;
 const int ledPin = 13;
 
-float calibration_factor = 300;
+float calibrationValue;
+long stabilizingtime = 2000;
+boolean _tare = true;
+const int calVal_eepromAdress = 0;
+long t;
+
 int weight = 0;
 int distance = 0;
 
@@ -22,7 +28,7 @@ bool onStatus = false;
 bool weightStatus = false;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
-HX711 scale(doutPin, sckPin);
+HX711_ADC LoadCell(doutPin, sckPin);
 Servo servo1;
 Servo servo2;
 
@@ -30,10 +36,22 @@ void init_device() {
   Serial.begin(9600);
   lcd.begin();
   lcd.backlight();
-  scale.set_scale(calibration_factor);
-  scale.tare();
   servo1.attach(servo1Pin, 600, 2300);
   servo2.attach(servo2Pin, 600, 2300);
+  LoadCell.begin();
+#if defined(ESP8266) || defined(ESP32)
+  EEPROM.begin(512);
+#endif
+  EEPROM.get(calVal_eepromAdress, calibrationValue);
+  LoadCell.start(stabilizingtime, _tare);
+  if (LoadCell.getTareTimeoutFlag()) {
+    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
+    while (1)
+      ;
+  } else {
+    LoadCell.setCalFactor(calibrationValue);
+    Serial.println("Startup is complete");
+  }
   delay(50);
 }
 
@@ -97,28 +115,24 @@ void weight_process() {
   Serial.println("Weight Process");
   weight = read_weight();
   Serial.println("Weight:" + String(weight));
-  if (weight > 10) {
-    delay(1000);
-    weight = read_weight();
-    if (weight >= 100) {
-      weightStatus = true;
-      smallcounter++;
-      Serial.println("S Fish:" + String(smallcounter));
-      lcd_show(1, 0, "S Fish:" + String(smallcounter), 1000);
-    } else {
-      weightStatus = false;
-      bigcounter++;
-      Serial.println("B Fish:" + String(bigcounter));
-      lcd_show(1, 0, "B Fish:" + String(bigcounter), 1000);
-    }
+  weight = read_weight();
+  if (weight >= 100) {
+    weightStatus = true;
+    smallcounter++;
+    Serial.println("S Fish:" + String(smallcounter));
+    lcd_show(1, 0, "S Fish:" + String(smallcounter), 1000);
+  } else {
+    weightStatus = false;
+    bigcounter++;
+    Serial.println("B Fish:" + String(bigcounter));
+    lcd_show(1, 0, "B Fish:" + String(bigcounter), 1000);
   }
 }
 
 int read_ultrasonic() {
   Serial.println("Read Sensor Ultrasonic");
-  long duration = 0;
-  int distance = 0;
-
+  long duration;
+  int distance;
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
@@ -131,8 +145,20 @@ int read_ultrasonic() {
 
 int read_weight() {
   Serial.println("Read Weight");
-  // scale.set_scale(calibration_factor);
-  return (scale.get_units(), 1);
+  static boolean newDataReady = 0;
+  const int serialPrintInterval = 0;
+
+  if (LoadCell.update())
+    newDataReady = true;
+
+  if (newDataReady) {
+    if (millis() > t + serialPrintInterval) {
+      float i = LoadCell.getData();
+      newDataReady = 0;
+      t = millis();
+      return i;
+    }
+  }
 }
 
 void servo1_on() {
