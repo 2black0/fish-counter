@@ -77,11 +77,15 @@ void setup() {
 }
 
 void loop() {
-  on_process();
-  if (onStatus) {
-    onStatus = false;
+  distance = read_ultrasonic();
+  Serial.println("Distance:" + String(distance));
+  lcd_show(1, 0, "Distance:" + String(distance), 100);
+  if (distance < 50) {
+    totalcounter++;
     led_on();
     servo1_on();
+    Serial.println("Counter:" + String(totalcounter));
+    lcd_show(1, 0, "Counter:" + String(totalcounter), 100);
   } else {
     led_off();
     servo1_off();
@@ -89,12 +93,22 @@ void loop() {
 
   if (LoadCell.update())
     newDataReady = true;
+  if (newDataReady) {
+    if (millis() > t + serialPrintInterval) {
+      float weight = LoadCell.getData();
+      Serial.println("Weight:" + String(weight));
+      lcd_show(1, 0, "Weight:" + String(weight), 100);
+      newDataReady = 0;
+      t = millis();
+    }
+  }
 
-  weight_process();
-  if (weightStatus) {
-    weightStatus = false;
+  if (weight >= 100) {
+    smallcounter++;
     led_on();
     servo2_on();
+    Serial.println("S Fish:" + String(smallcounter));
+    lcd_show(1, 0, "S Fish:" + String(smallcounter), 100);
   } else {
     led_off();
     servo2_off();
@@ -103,10 +117,10 @@ void loop() {
   Serial.println("S Fish:" + String(smallcounter));
   Serial.println("B Fish:" + String(bigcounter));
   lcd_show(1, 0, "S Fish:" + String(smallcounter), 1);
-  lcd_show(0, 1, "B Fish:" + String(bigcounter), 1000);
+  lcd_show(0, 1, "B Fish:" + String(bigcounter), 100);
 }
 
-void on_process() {
+/*void on_process() {
   Serial.println("On Process");
   distance = read_ultrasonic();
   Serial.println("Distance:" + String(distance));
@@ -137,7 +151,7 @@ void weight_process() {
     Serial.println("B Fish:" + String(bigcounter));
     lcd_show(1, 0, "B Fish:" + String(bigcounter), 1000);
   }
-}
+}*/
 
 int read_ultrasonic() {
   Serial.println("Read Distance");
@@ -153,7 +167,7 @@ int read_ultrasonic() {
   return distance;
 }
 
-int read_weight() {
+/*int read_weight() {
   Serial.println("Read Weight");
   if (newDataReady) {
     if (millis() > t + serialPrintInterval) {
@@ -163,7 +177,7 @@ int read_weight() {
       return i;
     }
   }
-}
+}*/
 
 void servo1_on() {
   Serial.println("Servo 1 ON");
