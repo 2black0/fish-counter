@@ -2,7 +2,6 @@
 // coded by 2black0
 // -----
 
-#include <EEPROM.h>
 #include <HX711_ADC.h>
 #include <LiquidCrystal_I2C.h>
 #include <Servo.h>
@@ -15,22 +14,19 @@ const int servo1Pin = 9;
 const int servo2Pin = 10;
 const int ledPin = 13;
 
-float calibrationValue;
-long stabilizingtime = 2000;
-boolean _tare = true;
-const int calVal_eepromAdress = 0;
-long t;
+float calibrationValue = 1.0; // ganti dengan new calibration value
 static boolean newDataReady = 0;
 const int serialPrintInterval = 0;
+long t;
 
-int weight = 0;
+float weight = 0;
 int distance = 0;
 
 int totalcounter = 0;
 int smallcounter = 0;
 int bigcounter = 0;
 
-bool onStatus = false;
+static boolean onStatus = 0;
 bool weightStatus = false;
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -38,26 +34,30 @@ HX711_ADC LoadCell(doutPin, sckPin);
 Servo servo1;
 Servo servo2;
 
+void init_hx711() {
+  LoadCell.begin();
+  long stabilizingtime = 2000;
+  boolean _tare = false;
+  LoadCell.start(stabilizingtime, _tare);
+  if (LoadCell.getTareTimeoutFlag() || LoadCell.getSignalTimeoutFlag()) {
+    Serial.println("Check LoadCell");
+    lcd_show(1, 0, "Check LoadCell", 500);
+    while (1)
+      ;
+  } else {
+    LoadCell.setCalFactor(calibrationValue);
+    Serial.println("LoadCell OK");
+    lcd_show(1, 0, "LoadCell OK", 500);
+  }
+}
+
 void init_device() {
   Serial.begin(9600);
   lcd.begin();
   lcd.backlight();
   servo1.attach(servo1Pin, 600, 2300);
   servo2.attach(servo2Pin, 600, 2300);
-  LoadCell.begin();
-#if defined(ESP8266) || defined(ESP32)
-  EEPROM.begin(512);
-#endif
-  EEPROM.get(calVal_eepromAdress, calibrationValue);
-  LoadCell.start(stabilizingtime, _tare);
-  if (LoadCell.getTareTimeoutFlag()) {
-    Serial.println("Timeout, check MCU>HX711 wiring and pin designations");
-    while (1)
-      ;
-  } else {
-    LoadCell.setCalFactor(calibrationValue);
-    Serial.println("Startup is complete");
-  }
+  init_hx711();
   delay(50);
 }
 
@@ -79,13 +79,15 @@ void setup() {
 void loop() {
   distance = read_ultrasonic();
   Serial.println("Distance:" + String(distance));
-  lcd_show(1, 0, "Distance:" + String(distance), 100);
-  if (distance < 50) {
+  // lcd_show(1, 0, "Distance:" + String(distance), 100);
+  if (distance <= 25) {
+    onStatus = true;
+    distance = 0;
     totalcounter++;
     led_on();
     servo1_on();
     Serial.println("Counter:" + String(totalcounter));
-    lcd_show(1, 0, "Counter:" + String(totalcounter), 100);
+    // lcd_show(1, 0, "Counter:" + String(totalcounter), 100);
   } else {
     led_off();
     servo1_off();
@@ -93,31 +95,37 @@ void loop() {
 
   if (LoadCell.update())
     newDataReady = true;
-  if (newDataReady) {
+  if (newDataReady && onStatus) {
     if (millis() > t + serialPrintInterval) {
-      float weight = LoadCell.getData();
-      Serial.println("Weight:" + String(weight));
-      lcd_show(1, 0, "Weight:" + String(weight), 100);
+      weight = LoadCell.getData();
+      // Serial.println("Weight:" + String(weight));
+      // lcd_show(1, 0, "Weight:" + String(weight), 100);
       newDataReady = 0;
+      onStatus = 0;
       t = millis();
+
+      if (weight < 8538676) {
+        smallcounter++;
+        led_on();
+        servo2_on();
+        Serial.println("Weight <= 200 gram");
+        Serial.println("S Fish:" + String(smallcounter));
+        // lcd_show(1, 0, "S Fish:" + String(smallcounter), 100);
+      } else if (weight >= 8538676) {
+        bigcounter++;
+        led_off();
+        servo2_off();
+        Serial.println("Weight > 200 gram");
+        Serial.println("B Fish:" + String(bigcounter));
+        // lcd_show(1, 0, "B Fish:" + String(bigcounter), 100);
+      }
     }
   }
 
-  if (weight >= 100) {
-    smallcounter++;
-    led_on();
-    servo2_on();
-    Serial.println("S Fish:" + String(smallcounter));
-    lcd_show(1, 0, "S Fish:" + String(smallcounter), 100);
-  } else {
-    led_off();
-    servo2_off();
-  }
-
-  Serial.println("S Fish:" + String(smallcounter));
-  Serial.println("B Fish:" + String(bigcounter));
-  lcd_show(1, 0, "S Fish:" + String(smallcounter), 1);
-  lcd_show(0, 1, "B Fish:" + String(bigcounter), 100);
+  lcd_show(1, 0, "Total:" + String(totalcounter), 1);
+  lcd_show(0, 1, "S :" + String(smallcounter) + "B :" + String(bigcounter),
+           100);
+  // lcd_show(0, 1, "B Fish:" + String(bigcounter), 100);
 }
 
 /*void on_process() {
