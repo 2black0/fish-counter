@@ -79,27 +79,24 @@ void setup() {
 void loop() {
   distance = read_ultrasonic();
   Serial.println("Distance:" + String(distance));
-  // lcd_show(1, 0, "Distance:" + String(distance), 100);
   if (distance <= 25) {
     onStatus = true;
     distance = 0;
     totalcounter++;
-    led_on();
-    servo1_on();
+    // led_on();
+    // servo1_on();
     Serial.println("Counter:" + String(totalcounter));
-    // lcd_show(1, 0, "Counter:" + String(totalcounter), 100);
-  } else {
-    led_off();
-    servo1_off();
-  }
+  } // else {
+    // led_off();
+    // servo1_off();
+  //}
 
   if (LoadCell.update())
     newDataReady = true;
+
   if (newDataReady && onStatus) {
     if (millis() > t + serialPrintInterval) {
       weight = LoadCell.getData();
-      // Serial.println("Weight:" + String(weight));
-      // lcd_show(1, 0, "Weight:" + String(weight), 100);
       newDataReady = 0;
       onStatus = 0;
       t = millis();
@@ -110,22 +107,20 @@ void loop() {
         servo2_on();
         Serial.println("Weight <= 200 gram");
         Serial.println("S Fish:" + String(smallcounter));
-        // lcd_show(1, 0, "S Fish:" + String(smallcounter), 100);
+        led_off();
       } else if (weight >= 8538676) {
         bigcounter++;
-        led_off();
+        led_on();
         servo2_off();
         Serial.println("Weight > 200 gram");
         Serial.println("B Fish:" + String(bigcounter));
-        // lcd_show(1, 0, "B Fish:" + String(bigcounter), 100);
+        led_off();
       }
     }
   }
 
   lcd_show(1, 0, "Total:" + String(totalcounter), 1);
-  lcd_show(0, 1, "S :" + String(smallcounter) + "B :" + String(bigcounter),
-           100);
-  // lcd_show(0, 1, "B Fish:" + String(bigcounter), 100);
+  lcd_show(0, 1, "S:" + String(smallcounter) + " B:" + String(bigcounter), 100);
 }
 
 /*void on_process() {
@@ -214,13 +209,13 @@ void servo2_off() {
 void led_on() {
   Serial.println("Led ON");
   digitalWrite(ledPin, LOW);
-  delay(100);
+  // delay(100);
 }
 
 void led_off() {
   Serial.println("Led OFF");
   digitalWrite(ledPin, HIGH);
-  delay(100);
+  // delay(100);
 }
 
 void lcd_show(int clear, int lines, String text, int timedelay) {
